@@ -82,22 +82,15 @@ public class ArcusCryptoUtil {
 
         try {
             String decrypted = null;
-            // Assume the IV (16 bytes) is prepended to the ciphertext (hex string)
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");	            byte[] allBytes = hexToByteArray(srcString);
-            if (allBytes.length < 16) {
-                logger.error("AES decrypt error: input too short to contain IV.");
-                return srcString;
-            }
-            byte[] ivBytes = new byte[16];
-            System.arraycopy(allBytes, 0, ivBytes, 0, 16);
-            byte[] cipherBytes = new byte[allBytes.length - 16];
-            System.arraycopy(allBytes, 16, cipherBytes, 0, allBytes.length - 16);
+            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
 
             Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
 
+            byte[] ivBytes = { 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36 };
+
             AlgorithmParameterSpec IVspec = new IvParameterSpec(ivBytes);
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, IVspec);
-            decrypted = new String(cipher.doFinal(cipherBytes), "UTF-8");
+            decrypted = new String(cipher.doFinal(hexToByteArray(srcString)), "UTF-8");
             return decrypted.trim();
         } catch (InvalidKeyException e) {
             logger.error("AES decrypt error invalid key=" + key);
