@@ -1,10 +1,11 @@
 package com.kt.arcus.common.util;
 
 import java.security.InvalidKeyException;
+import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.kt.arcus.common.exception.ArcusCryptoException;
@@ -47,16 +48,24 @@ public class ArcusCryptoUtil {
             String encryptedHex = null;
             SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
 
-            // Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            // Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");	            // Use AES in GCM mode with a 12-byte nonce
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");	            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 
-            byte[] ivBytes = { 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36 };
+            // Generate a random 12-byte nonce (recommended GCM IV size)
+            byte[] nonce = new byte[12];
+            SecureRandom random = new SecureRandom();
+            random.nextBytes(nonce);
 
-            AlgorithmParameterSpec IVspec = new IvParameterSpec(ivBytes);
-            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, IVspec);
-            // encrypted = new String(cipher.doFinal(hexToByteArray(srcString)), "UTF-8");
-            byte[] encrypted = cipher.doFinal(srcString.getBytes());
-            encryptedHex = byteArrayToHex(encrypted);
+            GCMParameterSpec gcmSpec = new GCMParameterSpec(128, nonce); // 128-bit authentication tag
+            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, gcmSpec);
+            byte[] encrypted = cipher.doFinal(srcString.getBytes("UTF-8"));
+
+            // Concatenate nonce + encrypted data
+            byte[] result = new byte[nonce.length + encrypted.length];
+            System.arraycopy(nonce, 0, result, 0, nonce.length);
+            System.arraycopy(encrypted, 0, result, nonce.length, encrypted.length);
+
+            encryptedHex = byteArrayToHex(result);
             return encryptedHex;
             // return encrypted.trim();
         } catch (InvalidKeyException e) {
@@ -73,15 +82,22 @@ public class ArcusCryptoUtil {
 
         try {
             String decrypted = null;
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+            // Assume the IV (16 bytes) is prepended to the ciphertext (hex string)
+            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");	            byte[] allBytes = hexToByteArray(srcString);
+            if (allBytes.length < 16) {
+                logger.error("AES decrypt error: input too short to contain IV.");
+                return srcString;
+            }
+            byte[] ivBytes = new byte[16];
+            System.arraycopy(allBytes, 0, ivBytes, 0, 16);
+            byte[] cipherBytes = new byte[allBytes.length - 16];
+            System.arraycopy(allBytes, 16, cipherBytes, 0, allBytes.length - 16);
 
             Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
 
-            byte[] ivBytes = { 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36 };
-
             AlgorithmParameterSpec IVspec = new IvParameterSpec(ivBytes);
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, IVspec);
-            decrypted = new String(cipher.doFinal(hexToByteArray(srcString)), "UTF-8");
+            decrypted = new String(cipher.doFinal(cipherBytes), "UTF-8");
             return decrypted.trim();
         } catch (InvalidKeyException e) {
             logger.error("AES decrypt error invalid key=" + key);
