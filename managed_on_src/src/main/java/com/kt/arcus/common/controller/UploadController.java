@@ -149,6 +149,9 @@ public class UploadController {
     public ResponseEntity<String> deleteFile(String fileName) throws Exception {
         if (fileName == null || fileName.isEmpty())
             throw new Exception("Invalid File Access");
+        // Universal validation: reject dangerous file names
+        if (fileName.contains("..") || fileName.contains("/") || fileName.contains("\\"))
+            throw new Exception("Invalid File Name");
 
         String formatName = fileName.substring(fileName.lastIndexOf(".")+1);
         MediaType mType = MediaUtils.getMediaType(formatName);
@@ -156,14 +159,24 @@ public class UploadController {
         if(mType != null) {
             String front = fileName.substring(0, 12);
             String end = fileName.substring(14);
-            String path = (front+end);
-            if (! CommonFunctions.isSafePath(path))
-                throw new Exception("Invalid File Access " + path);
-            new File(uploadPath + (front+end).replace('/', File.separatorChar)).delete();
+            String combined = front + end;
+            if (combined.contains("..") || combined.contains("/") || combined.contains("\\")) {
+                throw new Exception("Invalid File Name");
+            }
+            // Robust path validation: ensure deletion target is inside uploadPath
+            File deleteTarget = new File(uploadPath, combined.replace('/', File.separatorChar)).getCanonicalFile();
+            File uploadDir = new File(uploadPath).getCanonicalFile();
+            if (!deleteTarget.getPath().startsWith(uploadDir.getPath()))
+                throw new Exception("Invalid File Access " + deleteTarget.getPath());
+            deleteTarget.delete();
         }//if
         
-        new File(uploadPath + fileName.replace('/', File.separatorChar)).delete();
-        
+        File deleteTarget = new File(uploadPath, fileName.replace('/', File.separatorChar)).getCanonicalFile();
+        File uploadDir = new File(uploadPath).getCanonicalFile();
+        if (!deleteTarget.getPath().startsWith(uploadDir.getPath()))
+            throw new Exception("Invalid File Access " + deleteTarget.getPath());
+        deleteTarget.delete();
+
         return new ResponseEntity<String>("deleted", HttpStatus.OK);
     }
 }
