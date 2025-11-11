@@ -27,9 +27,9 @@ public class RequestWrapper extends HttpServletRequestWrapper {
 	private static final Pattern jsPatternGeneral = Pattern.compile("javascript:", Pattern.CASE_INSENSITIVE);
 	private static final Pattern vbPattern = Pattern.compile("vbscript:", Pattern.CASE_INSENSITIVE);
 	private static final Pattern onloadPattern = Pattern.compile("onload(.*?)=", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-	private static final Pattern onpointerPattern = Pattern.compile("<.* onpointer.*>", Pattern.CASE_INSENSITIVE);
-	private static final Pattern ontogglePattern = Pattern.compile("<.*ontoggle.*>", Pattern.CASE_INSENSITIVE);
-	private static final Pattern iframePattern = Pattern.compile("<iframe(.*?)>", Pattern.CASE_INSENSITIVE);
+	private static final Pattern onpointerPattern = Pattern.compile("(?i)<[^>]*\\bonpointer\\b[^>]*>");
+	private static final Pattern ontogglePattern = Pattern.compile("(?i)<[^>]*\\bontoggle\\b[^>]*>");
+	private static final Pattern iframePattern = Pattern.compile("(?i)<iframe\\b[^>]*>");
 
 	private static final String[] filterStrings = {
 		// "javascript",		// ignore simple patterns
@@ -170,7 +170,7 @@ public class RequestWrapper extends HttpServletRequestWrapper {
 			value = iframePattern.matcher(value).replaceAll("");
 
 			for (String token : filterStrings) {
-				value = value.replaceAll(token, "_"+ token +"_");
+				value = value.replace(token, "_" + token + "_");
 			}
 		}
 		return value;
