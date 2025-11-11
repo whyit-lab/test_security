@@ -16,17 +16,17 @@ import org.apache.commons.io.IOUtils;
 public class RequestWrapper extends HttpServletRequestWrapper {
 	private byte[] b;
 
-	private static final Pattern scriptPattern = Pattern.compile("<script>(.*?)</script>", Pattern.CASE_INSENSITIVE);
-	private static final Pattern srcPatternSingleQuote = Pattern.compile("src[\r\n]*=[\r\n]*\\\'(.*?)\\\'", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-	private static final Pattern srcPatternDoubleQuote = Pattern.compile("src[\r\n]*=[\r\n]*\\\"(.*?)\\\"", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-	private static final Pattern scriptEndPattern = Pattern.compile("</script>", Pattern.CASE_INSENSITIVE);
-	private static final Pattern scriptPattern2 = Pattern.compile("<script(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-	private static final Pattern evalPattern = Pattern.compile("eval\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-	private static final Pattern expPattern = Pattern.compile("expression\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-	private static final Pattern jsPattern1 = Pattern.compile("javascript:.*\\)", Pattern.CASE_INSENSITIVE);
-	private static final Pattern jsPatternGeneral = Pattern.compile("javascript:", Pattern.CASE_INSENSITIVE);
-	private static final Pattern vbPattern = Pattern.compile("vbscript:", Pattern.CASE_INSENSITIVE);
-	private static final Pattern onloadPattern = Pattern.compile("onload(.*?)=", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+	private static final int MAX_REGEX_INPUT_LENGTH = 4096;
+
+	private static final Pattern scriptPattern = Pattern.compile("(?is)<\\s*script\\b[^>]*>[\\s\\S]*?</\\s*script\\s*>");
+	private static final Pattern srcPatternSingleQuote = Pattern.compile("(?i)\\bsrc\\s*=\\s*'[^']*'");
+	private static final Pattern srcPatternDoubleQuote = Pattern.compile("(?i)\\bsrc\\s*=\\s*\"[^\"]*\"");
+	private static final Pattern evalPattern = Pattern.compile("(?i)\\beval\\s*\\((?:[^)(]|\\((?:[^)(]|\\([^)(]*\\))*\\))*\\)");
+	private static final Pattern expPattern = Pattern.compile("(?i)\\bexpression\\s*\\([^)]*\\)");
+	private static final Pattern jsPattern1 = Pattern.compile("(?i)javascript:[^\\s\"]*\\)");
+	private static final Pattern jsPatternGeneral = Pattern.compile("(?i)javascript:");
+	private static final Pattern vbPattern = Pattern.compile("(?i)vbscript:");
+	private static final Pattern onloadPattern = Pattern.compile("(?i)\\bonload\\s*=\\s*(\"[^\"]*\"|'[^']*'|[^\\s>]+)");
 	private static final Pattern onpointerPattern = Pattern.compile("(?i)<[^>]*\\bonpointer\\b[^>]*>");
 	private static final Pattern ontogglePattern = Pattern.compile("(?i)<[^>]*\\bontoggle\\b[^>]*>");
 	private static final Pattern iframePattern = Pattern.compile("(?i)<iframe\\b[^>]*>");
@@ -151,29 +151,63 @@ public class RequestWrapper extends HttpServletRequestWrapper {
 	};
 
 	private String stripXSS(String value) {
-		if (value != null) {
-			value = value.replaceAll("", "");
+		if (value == null) {
+			return null;
+		}
 
-			value = scriptPattern.matcher(value).replaceAll("");
-			value = srcPatternSingleQuote.matcher(value).replaceAll("");
-			value = srcPatternDoubleQuote.matcher(value).replaceAll("");
-			value = scriptEndPattern.matcher(value).replaceAll("");
-			value = scriptPattern2.matcher(value).replaceAll("");
-			value = evalPattern.matcher(value).replaceAll("");
-			value = expPattern.matcher(value).replaceAll("");
-			value = jsPattern1.matcher(value).replaceAll("");
-			value = jsPatternGeneral.matcher(value).replaceAll("");
-			value = vbPattern.matcher(value).replaceAll("");
-			value = onloadPattern.matcher(value).replaceAll("");
-			value = onpointerPattern.matcher(value).replaceAll("");
-			value = ontogglePattern.matcher(value).replaceAll("");
-			value = iframePattern.matcher(value).replaceAll("");
+		String sanitized = value;
+		if (sanitized.length() > MAX_REGEX_INPUT_LENGTH) {
+			sanitized = escapeForLargeInput(sanitized);
+		} else {
+			sanitized = applyRegexSanitizers(sanitized);
+		}
 
-			for (String token : filterStrings) {
-				value = value.replace(token, "_" + token + "_");
+		for (String token : filterStrings) {
+			sanitized = sanitized.replace(token, "_" + token + "_");
+		}
+		return sanitized;
+	}
+
+	private String applyRegexSanitizers(String value) {
+		String sanitized = value;
+		sanitized = scriptPattern.matcher(sanitized).replaceAll("");
+		sanitized = srcPatternSingleQuote.matcher(sanitized).replaceAll("");
+		sanitized = srcPatternDoubleQuote.matcher(sanitized).replaceAll("");
+		sanitized = evalPattern.matcher(sanitized).replaceAll("");
+		sanitized = expPattern.matcher(sanitized).replaceAll("");
+		sanitized = jsPattern1.matcher(sanitized).replaceAll("");
+		sanitized = jsPatternGeneral.matcher(sanitized).replaceAll("");
+		sanitized = vbPattern.matcher(sanitized).replaceAll("");
+		sanitized = onloadPattern.matcher(sanitized).replaceAll("");
+		sanitized = onpointerPattern.matcher(sanitized).replaceAll("");
+		sanitized = ontogglePattern.matcher(sanitized).replaceAll("");
+		sanitized = iframePattern.matcher(sanitized).replaceAll("");
+		return sanitized;
+	}
+
+	private String escapeForLargeInput(String value) {
+		StringBuilder builder = new StringBuilder(value.length());
+		for (int i = 0; i < value.length(); i++) {
+			char ch = value.charAt(i);
+			switch (ch) {
+			case '<':
+				builder.append("&lt;");
+				break;
+			case '>':
+				builder.append("&gt;");
+				break;
+			case '"':
+				builder.append("&quot;");
+				break;
+			case '\'':
+				builder.append("&#39;");
+				break;
+			default:
+				builder.append(ch);
+				break;
 			}
 		}
-		return value;
+		return builder.toString();
 	}
 
 	public RequestWrapper(HttpServletRequest request) throws IOException {
