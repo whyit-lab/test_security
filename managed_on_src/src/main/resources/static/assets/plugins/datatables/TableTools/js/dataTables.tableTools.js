@@ -32,6 +32,15 @@ var TableTools;
 
 (function(window, document, undefined) {
 
+// repeatedly remove all HTML tags from a string using regex
+function stripHtmlTagsRepeatedly(input) {
+    let prev;
+    do {
+        prev = input;
+        input = input.replace(/<.*?>/g, "");
+    } while (input !== prev);
+    return input;
+}
 
 var factory = function( $, DataTable ) {
 "use strict";
@@ -1833,12 +1842,12 @@ TableTools.prototype = {
 			flash.setAction( 'save' );
 			flash.setCharSet( (oConfig.sCharSet=="utf16le") ? 'UTF16LE' : 'UTF8' );
 			flash.setBomInc( oConfig.bBomInc );
-			flash.setFileName( oConfig.sFileName.replace('*', this.fnGetTitle(oConfig)) );
+			flash.setFileName( oConfig.sFileName.replace(/\*/g, this.fnGetTitle(oConfig)) );
 		}
 		else if ( oConfig.sAction == "flash_pdf" )
 		{
 			flash.setAction( 'pdf' );
-			flash.setFileName( oConfig.sFileName.replace('*', this.fnGetTitle(oConfig)) );
+			flash.setFileName( oConfig.sFileName.replace(/\*/g, this.fnGetTitle(oConfig)) );
 		}
 		else
 		{
@@ -2052,7 +2061,8 @@ TableTools.prototype = {
 			{
 				if ( aColumnsInc[i] )
 				{
-					sLoopData = dt.aoColumns[i].sTitle.replace(/\n/g," ").replace( /<.*?>/g, "" ).replace(/^\s+|\s+$/g,"");
+					// fix incomplete multi-character sanitization by repeatedly removing HTML tags
+					sLoopData = stripHtmlTagsRepeatedly(dt.aoColumns[i].sTitle.replace(/\n/g," ")).replace(/^\s+|\s+$/g,"");
 					sLoopData = this._fnHtmlDecode( sLoopData );
 
 					aRow.push( this._fnBoundData( sLoopData, oConfig.sFieldBoundary, regex ) );
@@ -2101,7 +2111,12 @@ TableTools.prototype = {
 						sLoopData =
 						    sLoopData.replace(/<img.*?\s+alt\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+)).*?>/gi,
 						        '$1$2$3');
-						sLoopData = sLoopData.replace( /<.*?>/g, "" );
+						// Iteratively remove all HTML tags robustly
+						var previous;
+						do {
+							previous = sLoopData;
+							sLoopData = sLoopData.replace(/<.*?>/g, "");
+						} while (sLoopData !== previous);
 					}
 					else
 					{
@@ -2143,7 +2158,15 @@ TableTools.prototype = {
 			{
 				if ( aColumnsInc[i] && dt.aoColumns[i].nTf !== null )
 				{
-					sLoopData = dt.aoColumns[i].nTf.innerHTML.replace(/\n/g," ").replace( /<.*?>/g, "" );
+					sLoopData = dt.aoColumns[i].nTf.innerHTML.replace(/\n/g," ");
+					sLoopData = (function stripTags(input) {
+					  var prev;
+					  do {
+					    prev = input;
+					    input = input.replace(/<.*?>/g, "");
+					  } while (input !== prev);
+					  return input;
+					})(sLoopData);
 					sLoopData = this._fnHtmlDecode( sLoopData );
 
 					aRow.push( this._fnBoundData( sLoopData, oConfig.sFieldBoundary, regex ) );

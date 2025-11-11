@@ -48,6 +48,16 @@
 		
 		_show: function(title, msg, value, type, callback, htmlMsg) {
 			
+			// Escape HTML utility function
+            function escapeHtml(str) {
+                return String(str)
+                  .replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;')
+                  .replace(/'/g, '&#39;');
+            }
+
 			$.alerts._hide();
 			$.alerts._overlay('show');
 			
@@ -75,8 +85,8 @@
 			
 			$("#popup_title").text(title);
 			$("#popup_content").addClass(type);
-			$("#popup_message").text(msg);
-			$("#popup_message").html( $("#popup_message").text().replace(/\n/g, '<br />') );
+			var safeMsg = escapeHtml(msg).replace(/\n/g, '<br />');
+			$("#popup_message").html(safeMsg);
 			
 			if(htmlMsg) {
 				$("#popup_html_message").append(htmlMsg);

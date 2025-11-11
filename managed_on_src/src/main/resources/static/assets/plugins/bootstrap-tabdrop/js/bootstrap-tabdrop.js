@@ -51,6 +51,8 @@
 		}
 	}());
 
+	// WARNING: options.text is inserted as HTML and is NOT escaped/sanitized.
+	// Only provide trusted HTML. Supplying user/untrusted content may lead to XSS vulnerabilities.
 	var TabDrop = function(element, options) {
 		this.element = $(element);
 		this.dropdown = $('<li class="dropdown hide pull-right tabdrop"><a class="dropdown-toggle" data-toggle="dropdown" href="#">'+options.text+' </a><ul class="dropdown-menu"></ul></li>')
@@ -177,6 +179,8 @@
 		})
 	};
 
+	// WARNING: The 'text' option value is inserted as HTML and is NOT escaped/sanitized.
+	// Only provide trusted HTML. Supplying user/untrusted content may lead to XSS vulnerabilities.
 	$.fn.tabdrop.defaults = {
 		text: '<i class="fa fa-angle-down"></i>'
 	};

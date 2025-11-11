@@ -246,7 +246,12 @@
 	
 	
 	var _stripHtml = function ( d ) {
-		return d.replace( _re_html, '' );
+		var prev;
+		do {
+			prev = d;
+			d = d.replace(_re_html, '');
+		} while (d !== prev);
+		return d;
 	};
 	
 	
@@ -4270,8 +4275,11 @@
 	
 		for ( var i=0, ien=settings.aoData.length ; i<ien ; i++ ) {
 			s = _fnGetCellData( settings, i, colIdx, 'display' )+'';
-			s = s.replace( __re_html_remove, '' );
-	
+			var prev;
+			do {
+				prev = s;
+				s = s.replace( __re_html_remove, '' );
+			} while (s !== prev);
 			if ( s.length > max ) {
 				max = s.length;
 				maxIdx = i;
@@ -4563,7 +4571,7 @@
 		{
 			var col = columns[i];
 			var asSorting = col.asSorting;
-			var sTitle = col.sTitle.replace( /<.*?>/g, "" );
+			var sTitle = _stripHtmlTags( col.sTitle );
 			var th = col.nTh;
 	
 			// IE7 is throwing an error when setting these properties with jQuery's
@@ -4593,6 +4601,15 @@
 		}
 	}
 	
+	// Helper to iteratively remove all HTML tags (prevents incomplete multi-character sanitization)
+	function _stripHtmlTags ( str ) {
+		var prev;
+		do {
+			prev = str;
+			str = str.replace(/<.*?>/g, '');
+		} while (str !== prev);
+		return str;
+	}
 	
 	/**
 	 * Function to run on user sort request
@@ -14057,7 +14074,14 @@
 			return _empty(a) ?
 				'' :
 				a.replace ?
-					a.replace( /<.*?>/g, "" ).toLowerCase() :
+					(function(str) {
+						let prev;
+						do {
+							prev = str;
+							str = str.replace(/<.*?>/g, "");
+						} while (str !== prev);
+						return str.toLowerCase();
+					})(a) :
 					a+'';
 		},
 	

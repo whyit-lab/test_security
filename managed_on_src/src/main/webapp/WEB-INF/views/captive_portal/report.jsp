@@ -225,11 +225,11 @@ $(document).ready(function() {
             return "'"+$(el).val()+"'";
         }).get().join(',');
         let contentUrl = '/report/content'
-            + '?fromDt='+$('#id_fromDt').val()
-            + '&toDt='+$('#id_toDt').val()
-            + '&searchGenderCodes='+searchGenderCodes
-            + '&searchAgeCodes='+searchAgeCodes
-            + '&companyId='+$('#id_companyId').val()
+            + '?fromDt=' + encodeURIComponent($('#id_fromDt').val())
+            + '&toDt=' + encodeURIComponent($('#id_toDt').val())
+            + '&searchGenderCodes=' + encodeURIComponent(searchGenderCodes)
+            + '&searchAgeCodes=' + encodeURIComponent(searchAgeCodes)
+            + '&companyId=' + encodeURIComponent($('#id_companyId').val())
         
         $('.static-content-wrapper').LoadingOverlay('show', LOADING_OVERLAY_OPTION);
         $('.report-content').attr('src', contentUrl);

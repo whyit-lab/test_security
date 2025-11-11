@@ -76,8 +76,15 @@ $(document).ready(function () {
         $('#id_data_interval').val('${data_interval}');
 
     $('#btn_search').click(function() {
-        const url = '/visitor/analytics?data_interval='+ $('#id_data_interval').val();
-        location.href = url;
+        const allowed = ['hourly', 'daily'];
+        const interval = $('#id_data_interval').val();
+        if (allowed.includes(interval)) {
+            const url = '/visitor/analytics?data_interval=' + interval;
+            location.href = url;
+        } else {
+            // Optionally, show an error or fallback to a default safe value
+            alert('Invalid data interval selected.');
+        }
     });
 });
 </script>

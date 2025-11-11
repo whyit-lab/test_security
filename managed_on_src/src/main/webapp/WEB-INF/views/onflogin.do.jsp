@@ -637,10 +637,10 @@ function arcusLogin() {
     var captcha = $('#loginForm input[name="j_captcha"]').val()
     var captchaId = $('#loginForm input[name="BDC_VCID_loginCaptcha"]').val()
 
-    var inputLoginId = $('<input type="hidden" name="loginId" value="'+ loginId +'">')
-    var inputPassword = $('<input type="hidden" name="passWord" value="'+ password +'">')
-    var inputCaptcha = $('<input type="hidden" name="j_captcha" value="'+ captcha +'">')
-    var inputCaptchaId = $('<input type="hidden" name="BDC_VCID_loginCaptcha" value="'+ captchaId +'">')
+    var inputLoginId = $('<input type="hidden" name="loginId">').val(loginId)
+    var inputPassword = $('<input type="hidden" name="passWord">').val(password)
+    var inputCaptcha = $('<input type="hidden" name="j_captcha">').attr('value', captcha)
+    var inputCaptchaId = $('<input type="hidden" name="BDC_VCID_loginCaptcha">').val(captchaId)
     var data = $('<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">')
 
     form.append(inputLoginId)

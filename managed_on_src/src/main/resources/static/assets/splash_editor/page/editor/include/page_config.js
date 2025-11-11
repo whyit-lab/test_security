@@ -49,7 +49,7 @@ function load_curr_splash_page_info() {
         return;
     }
     if (g_G.ARCUS_EDITOR) {
-        location.href = '/splash_page_info/edit_view/' + spi_id + '?fromSystem=arcus';
+        location.href = '/splash_page_info/edit_view/' + encodeURIComponent(spi_id) + '?fromSystem=arcus';
     } else {
         spi.spi_id = g_G.splash_page_info.spi_id;
         g_G.splash_page_info = spi;

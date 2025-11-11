@@ -614,7 +614,7 @@ $(function() {
 function goto_splash_editor_page(btnEdit) {
     const tr = $(btnEdit).closest("tr");
     const spi_id = tr.find('#spi_id').text();
-    const url = `/static/assets/splash_editor/page/editor/index.html?spi_id=${spi_id}`;
+    const url = `/static/assets/splash_editor/page/editor/index.html?spi_id=${encodeURIComponent(spi_id)}`;
     //g_G.logLoy(url);
     window.location.href = url;
 

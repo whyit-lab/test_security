@@ -48,8 +48,8 @@ public class ArcusCryptoUtil {
             String encryptedHex = null;
             SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
 
-            // Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");	            // Use AES in GCM mode with a 12-byte nonce
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");	            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            // Use AES in GCM mode with a 12-byte nonce
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 
             // Generate a random 12-byte nonce (recommended GCM IV size)
             byte[] nonce = new byte[12];

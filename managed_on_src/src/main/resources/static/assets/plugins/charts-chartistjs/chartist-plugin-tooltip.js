@@ -40,6 +40,17 @@
 
       options = Chartist.extend({}, defaultOptions, options);
 
+      // Simple HTML escape function
+      function escapeHTML(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
       return function tooltip(chart) {
         var tooltipSelector = '.ct-point';
         if (chart instanceof Chartist.Bar) {
@@ -81,7 +92,7 @@
             tooltipText += options.suffix;
           }
 
-          $toolTip.html(tooltipText).show();
+          $toolTip.html(escapeHTML(tooltipText)).show();
         });
 
         $chart.on('mouseleave', tooltipSelector, function() {
