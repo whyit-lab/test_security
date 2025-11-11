@@ -1,6 +1,8 @@
 package com.kt.arcus.common.controller;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -63,6 +65,11 @@ public class UploadController {
     
     //업로드된 파일을 저장하는 함수
     private String uploadFile(String originalName, byte[] fileDate) throws IOException {
+        // Validate the original filename to prevent directory traversal and absolute paths
+        if (originalName.contains("..") || originalName.contains("/") || originalName.contains("\\")) {
+            logger.warn("Invalid filename for upload: {}", originalName);
+            throw new IllegalArgumentException("Invalid filename");
+        }
         UUID uid = UUID.randomUUID();
         
         String savedName = uid.toString() + "_" + originalName;
@@ -171,12 +178,6 @@ public class UploadController {
             deleteTarget.delete();
         }//if
         
-        File deleteTarget = new File(uploadPath, fileName.replace('/', File.separatorChar)).getCanonicalFile();
-        File uploadDir = new File(uploadPath).getCanonicalFile();
-        if (!deleteTarget.getPath().startsWith(uploadDir.getPath()))
-            throw new Exception("Invalid File Access " + deleteTarget.getPath());
-        deleteTarget.delete();
-
         return new ResponseEntity<String>("deleted", HttpStatus.OK);
     }
 }
