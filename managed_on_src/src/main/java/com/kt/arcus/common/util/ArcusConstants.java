@@ -74,7 +74,7 @@ public class ArcusConstants {
     static {
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(1024);
+            generator.initialize(2048);
             KeyPair keyPair = generator.genKeyPair();
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PublicKey publicKey = keyPair.getPublic();
