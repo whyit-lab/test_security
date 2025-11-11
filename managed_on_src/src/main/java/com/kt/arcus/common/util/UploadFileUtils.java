@@ -18,6 +18,10 @@ public class UploadFileUtils {
 	private static final Logger logger = LoggerFactory.getLogger(UploadFileUtils.class);
 
 	public static String uploadFile(String uploadPath, String originalName, byte[] fileData) throws Exception {
+		// Validate originalName to prevent path traversal or other dangerous input
+		if (originalName.contains("..") || originalName.contains("/") || originalName.contains("\\")) {
+			throw new IllegalArgumentException("Invalid filename");
+		}
 		
 		//겹쳐지지 않는 파일명을 위한 유니크한 값 생성
 		UUID uid = UUID.randomUUID();
