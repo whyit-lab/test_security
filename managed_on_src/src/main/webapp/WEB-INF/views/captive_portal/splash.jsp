@@ -41,28 +41,28 @@ function getParam(sname) {
 $(document).ready(function() {
     var base_grant_url = decodeURIComponent(getParam('base_grant_url') || '');
 
-    // Accept only URLs that match the current origin (same host & protocol), or are relative URLs.
-    function isSafeUrl(url) {
-        try {
-            var parsed = new URL(url, window.location.origin);
-            // Accept only same-origin absolute URLs, or relative URLs.
-            var isSameOrigin = (parsed.origin === window.location.origin);
-            var isRelative = !/^(?:[a-z]+:)?\/\//i.test(url); // No schema or host
-            return (parsed.protocol === 'http:' || parsed.protocol === 'https:') && (isSameOrigin || isRelative); 
-        } catch (error) {
-            return false;
-        }
-    }
 
-    if (isSafeUrl(base_grant_url)) {
-        $('#a_link').attr('href', base_grant_url);
+
+    // Define a list of authorized grant URLs. You must ensure this list only contains safe "src"/"href" values.
+    // This list should be populated on the server side, or come from config. For demonstration:
+    var ALLOWED_GRANT_URLS = [
+        '/some-grant-path', 
+        '/another-grant-endpoint'
+        // Add more allowed relative URLs as necessary.
+    ];
+
+    // Only accept base_grant_url if it matches ALLOWED_GRANT_URLS exactly.
+    var safe_grant_url = ALLOWED_GRANT_URLS.includes(base_grant_url) ? base_grant_url : '';
+
+    if (safe_grant_url) {
+        $('#a_link').attr('href', safe_grant_url);
     } else {
         $('#a_link').attr('href', '#');
     }
 
     $('#btn_click').click(function () {
-        if (isSafeUrl(base_grant_url)) {
-            $('#fm_hidden').attr('src', base_grant_url);
+        if (safe_grant_url) {
+            $('#fm_hidden').attr('src', safe_grant_url);
         } else {
             $('#fm_hidden').attr('src', 'about:blank');
         }
