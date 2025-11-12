@@ -129,7 +129,7 @@ $(document).ready(function() {
     }
 
     function makeAjaxUrl() {
-        return '/service_info/api/service_list?companyId='+ $('#id_companyId').val()
+        return '/service_info/api/service_list?companyId='+ encodeURIComponent($('#id_companyId').val())
     }
 
     function loadTable() {
@@ -160,7 +160,7 @@ $(document).ready(function() {
     });
 
     $('#btn_csv').click(function() {
-        openMenu('/service_info/download_csv?companyId='+ $('#id_companyId').val(), true)
+        openMenu('/service_info/download_csv?companyId='+ encodeURIComponent($('#id_companyId').val()), true)
     })
 
     let search_companyId = '${search_companyId}'
