@@ -18,18 +18,18 @@ public class RequestWrapper extends HttpServletRequestWrapper {
 
 	private static final int MAX_REGEX_INPUT_LENGTH = 4096;
 
-	private static final Pattern scriptPattern = Pattern.compile("(?is)<\\s*script\\b[^>]*>[\\s\\S]*?</\\s*script\\s*>");
-	private static final Pattern srcPatternSingleQuote = Pattern.compile("(?i)\\bsrc\\s*=\\s*'[^']*'");
-	private static final Pattern srcPatternDoubleQuote = Pattern.compile("(?i)\\bsrc\\s*=\\s*\"[^\"]*\"");
-	private static final Pattern evalPattern = Pattern.compile("(?i)\\beval\\s*\\((?:[^)(]|\\((?:[^)(]|\\([^)(]*\\))*\\))*\\)");
-	private static final Pattern expPattern = Pattern.compile("(?i)\\bexpression\\s*\\([^)]*\\)");
-	private static final Pattern jsPattern1 = Pattern.compile("(?i)javascript:[^\\s\"]*\\)");
+	private static final Pattern scriptPattern = Pattern.compile("(?is)<script\\b[^>]*+>(?:(?!</script).)*</script\\s*>");
+	private static final Pattern srcPatternSingleQuote = Pattern.compile("(?i)\\bsrc\\s*=\\s*'[^']*+'");
+	private static final Pattern srcPatternDoubleQuote = Pattern.compile("(?i)\\bsrc\\s*=\\s*\"[^\"]*+\"");
+	private static final Pattern evalPattern = Pattern.compile("(?i)\\beval\\s*\\([^)]*+\\)");
+	private static final Pattern expPattern = Pattern.compile("(?i)\\bexpression\\s*\\([^)]*+\\)");
+	private static final Pattern jsPattern1 = Pattern.compile("(?i)javascript:[^\\s\"')]*");
 	private static final Pattern jsPatternGeneral = Pattern.compile("(?i)javascript:");
 	private static final Pattern vbPattern = Pattern.compile("(?i)vbscript:");
 	private static final Pattern onloadPattern = Pattern.compile("(?i)\\bonload\\s*=\\s*(\"[^\"]*\"|'[^']*'|[^\\s>]+)");
-	private static final Pattern onpointerPattern = Pattern.compile("(?i)<[^>]*\\bonpointer\\b[^>]*>");
-	private static final Pattern ontogglePattern = Pattern.compile("(?i)<[^>]*\\bontoggle\\b[^>]*>");
-	private static final Pattern iframePattern = Pattern.compile("(?i)<iframe\\b[^>]*>");
+	private static final Pattern onpointerPattern = Pattern.compile("(?i)<[^>]*+\\bonpointer\\b[^>]*+>");
+	private static final Pattern ontogglePattern = Pattern.compile("(?i)<[^>]*+\\bontoggle\\b[^>]*+>");
+	private static final Pattern iframePattern = Pattern.compile("(?i)<iframe\\b[^>]*+>");
 
 	private static final String[] filterStrings = {
 		// "javascript",		// ignore simple patterns
