@@ -39,11 +39,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 						width="100%" height="300px" frameborder="0"  visibility="hidden" onload="this.style.visibility='visible';"></iframe>								
 				</div>
 				<div style="margin-left: 0px;margin-top: 10px;margin-right: 0px; margin-bottom: 10px;border: 1px solid #ddd;border-radius: 4px;background-color:#FFFFFF">
-					<center><font size="3" color="#000000" style="font-weight:bold;">SNMP Daemon Status</font></center>
-					<iframe src="http://61.36.41.24/availability-map/bare=yes/?username=admin&password=secui0427" 
-						width="100%" height="300px" frameborder="0" visibility="hidden" onload="this.style.visibility='visible';"></iframe>
-				</div>
-				<div style="margin-left: 0px;margin-top: 10px;margin-right: 0px; margin-bottom: 10px;border: 1px solid #ddd;border-radius: 4px;background-color:#FFFFFF">
 					<center><font size="3" color="#000000" style="font-weight:bold;">Server & Application Status</font></center>
 				    <iframe src="http://<spring:eval expression="@conf.getProperty('grafana.ip')" />:<spring:eval expression="@conf.getProperty('grafana.port')" />/d/rh1DbNxZz/sip_ems_srvstat?orgId=1&refresh=1m&from=now-1h&to=now&theme=light&kiosk=1" 
 						width="100%" height="300px" frameborder="0" visibility="hidden" onload="this.style.visibility='visible';"></iframe>
