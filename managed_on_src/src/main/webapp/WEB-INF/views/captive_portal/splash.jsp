@@ -39,12 +39,16 @@ function getParam(sname) {
 }
 
 $(document).ready(function() {
-    var base_grant_url = unescape(getParam('base_grant_url'))
-    
+    var base_grant_url = decodeURIComponent(getParam('base_grant_url') || '');
+
+    // Accept only URLs that match the current origin (same host & protocol), or are relative URLs.
     function isSafeUrl(url) {
         try {
             var parsed = new URL(url, window.location.origin);
-            return (parsed.protocol === 'http:' || parsed.protocol === 'https:');
+            // Accept only same-origin absolute URLs, or relative URLs.
+            var isSameOrigin = (parsed.origin === window.location.origin);
+            var isRelative = !/^(?:[a-z]+:)?\/\//i.test(url); // No schema or host
+            return (parsed.protocol === 'http:' || parsed.protocol === 'https:') && (isSameOrigin || isRelative); 
         } catch (error) {
             return false;
         }
