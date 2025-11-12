@@ -50,7 +50,7 @@ $(document).ready(function() {
         }
     }
 
-    if (!isSafeUrl(base_grant_url)) {
+    if (isSafeUrl(base_grant_url)) {
         $('#a_link').attr('href', base_grant_url);
     } else {
         $('#a_link').attr('href', '#');
