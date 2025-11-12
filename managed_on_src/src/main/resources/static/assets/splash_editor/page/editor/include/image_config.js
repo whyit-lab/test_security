@@ -10,12 +10,26 @@ function save_image_config() {
 
 }
 
+const ALLOWED_PREVIEW_IMAGE_TYPES = Object.freeze([
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "image/bmp"
+]);
+
+let currentPreviewObjectUrl = null;
+
 function image_config_showMyImage(fileInput) {
     var files = fileInput.files;
     for (var i = 0; i < files.length; i++) {
         var file = files[i];
         var imageType = /image.*/;
         if (!file.type.match(imageType)) {
+            continue;
+        }
+        if (ALLOWED_PREVIEW_IMAGE_TYPES.indexOf(file.type) === -1) {
+            alert("지원하지 않는 이미지 형식입니다. (허용: JPG, PNG, GIF, WEBP, BMP)");
             continue;
         }
         if (file.size > 6000000) {
@@ -28,8 +42,13 @@ function image_config_showMyImage(fileInput) {
         var reader = new FileReader();
         reader.onload = (function(aImg) {
             return function(e) {
-                //aImg.src = e.target.result;
-                aImg.src = window.URL.createObjectURL(file);
+                if (currentPreviewObjectUrl) {
+                    window.URL.revokeObjectURL(currentPreviewObjectUrl);
+                    currentPreviewObjectUrl = null;
+                }
+                var objectUrl = window.URL.createObjectURL(file);
+                currentPreviewObjectUrl = objectUrl;
+                aImg.src = objectUrl;
                 g_G.log('aImg=', $("#image_config_preview").height(), $("#image_config_preview").width());
 
                 // if ($(aImg).height() > 200 || $(aImg).width() > 1080) {
@@ -85,6 +104,10 @@ function image_config_bannerImageDelete() {
     g_G.splash_page_info.banner_image_id = -1;
     g_G.setup_preview_ui_image_config(g_G.splash_page_info);
     //g_G.setupEditorUI_image_config(g_G.splash_page_info);
+    if (currentPreviewObjectUrl) {
+        window.URL.revokeObjectURL(currentPreviewObjectUrl);
+        currentPreviewObjectUrl = null;
+    }
     $('#image_config_preview').attr('src', "/static/assets/splash_editor/img/1080x200upload.png");
 
 }
