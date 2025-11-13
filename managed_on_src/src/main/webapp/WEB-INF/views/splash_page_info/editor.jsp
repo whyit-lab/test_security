@@ -155,7 +155,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <script src="/static/assets/splash_editor/js/lib/Chart.min.js"></script>
   <script src="/static/assets/splash_editor/js/lib/Sortable.min.js">
   <script src="/static/assets/splash_editor/js/lib/editorjs@latest"></script>
-  <script src="/static/assets/splash_editor/ckeditor5/ckeditor.js"></script>
+  <script src="/static/assets/ckeditor/ckeditor.js"></script>
   
   <script src="/static/assets/splash_editor/js/lib/html5-qrcode.min.js" ></script>
   <script src="/static/assets/splash_editor/js/lib/qrcode.min.js" ></script>

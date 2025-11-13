@@ -109,27 +109,19 @@ scratch. This page gets rid of all links and provides the needed markup only.
      user experience. -->
 
 <!-- include summernote css/js -->
-<link rel="stylesheet" href="/static/assets/plugins/summernote-0.8.11-dist/dist/summernote.css">
-<script src="/static/assets/plugins/summernote-0.8.11-dist/dist/summernote.js"></script>
-<script src="/static/assets/plugins/summernote-0.8.11-dist/dist/lang/summernote-ko-KR.js"></script>
+<script src="/static/assets/ckeditor/ckeditor.js"></script>
 <script>
 var boardType = '${ boardType }';
 var boardRoot = '/board/' + boardType;
 
-var summernote = $('#id_boardContent').summernote({
-	lang: 'ko-KR',
-	minHeight: null,
-	maxHeight: null,
-	width: '100%',
-	height: 210,
-	focus: true,
-	disableResizeEditor: true,
-    disableDragAndDrop: true,
-    popover: {
-        image: [],
-        link: [],
-        air: []
-    }
+.create(document.querySelector('#id_boardContent'), {
+toolbar: ['heading','bold','italic','link','bulletedList','numberedList','blockQuote']
+})
+.then(editor => {
+window.editor = editor; // 필요 시 글로벌 참조
+})
+.catch(error => {
+console.error('CKEditor 초기화 오류', error);
 });
 
 // summernote disable upload div
